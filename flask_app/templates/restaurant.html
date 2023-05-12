@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Restaurant Search Results</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='custom.css') }}">
+    <style>
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+        .restaurant-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            grid-gap: 20px;
+        }
+        .restaurant-item {
+            border: 1px solid #000000;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.2s;
+        }
+        .restaurant-item:hover {
+            transform: scale(1.05);
+        }
+        .restaurant-image {
+            height: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .restaurant-image img {
+            max-width: 100%;
+            max-height: 100%;
+        }
+        .restaurant-details {
+            height: 50%;
+        }
+        .rating {
+            font-size: 24px;
+            color: #FFD700;
+        }
+        ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Search Results</h1>
+    </div>
+    
+    {% if businesses %}
+        <div class="restaurant-grid">
+            {% for business in businesses %}
+                <a href="{{ url_for('restaurant_detail', business_id=business.id) }}" class="restaurant-item">
+                    <div class="restaurant-image">
+                        <img src="{{ business.image_url }}" alt="Restaurant Image">
+                    </div>
+                    <div class="restaurant-details">
+                        <h2>{{ business.name }}</h2>
+                        <ul>
+                            <li><strong>Price Range:</strong> {{ business.price }}</li>
+                            <li><strong>Critics Rating:</strong> <span class="rating">{{ render_stars(business.rating) }}</span></li>
+                            <li><strong>FoodHub Rating:</strong> <span class="rating">{{ render_stars(business.rating) }}</span></li>
+                        </ul>
+                    </div>
+                </a>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p>No results found.</p>
+    {% endif %}
+</body>
+</html>

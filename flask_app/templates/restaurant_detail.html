@@ -1,14 +1,50 @@
-{% extends "header.html" %}
-{% block content %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ business.name }} Details</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='custom.css') }}">
+    <style>
+        .container {
+            display: flex;
+            align-items: center;
+        }
 
-<h1>{{ business.name }} Details</h1>
-<ul>
-    <li><strong>Name:</strong> {{ business.name }}</li>
-    <li><strong>Rating:</strong> {{ business.rating }}</li> 
-    <li><strong>Phone: </strong> {{ business.phone }}</li>
-    <li><strong>Address:</strong> {{ business. location.address1 }}, {{ business.location.city }}, {{ business.location.state }} {{ business.location.zip_code }}</li>
-    <li><strong>Price Range:</strong> {{ business.price }}</li>
-    <li><strong>Website:</strong> <a href="{{ business.url }}" target="_blank">{{ business.url }}</a></li>
-</ul>
- 
-{% endblock %}
+        .restaurant-image {
+            flex: 0 0 auto;
+            width: 200px;
+            margin-right: 20px;
+        }
+
+        .restaurant-details {
+            flex: 1 1 auto;
+        }
+
+        .rating {
+            font-size: 24px;
+            color: #FFD700; /* Golden yellow color */
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <img class="restaurant-image" src="{{ business.image_url }}" alt="Restaurant Image">
+        <div class="restaurant-details">
+            <h1>{{ business.name }} Details</h1>
+            <ul>
+                <li><strong>Name:</strong> {{ business.name }}</li>
+                <li><strong>Phone:</strong> {{ business.phone }}</li>
+                <li><strong>Address:</strong> {{ business.location.address1 }}, {{ business.location.city }}, {{ business.location.state }} {{ business.location.zip_code }}</li>
+                <li><strong>Price Range:</strong> {{ business.price }}</li>
+                <li><strong>Critics Rating:</strong> <span class="rating">{{ render_stars(business.rating) }}</span></li>
+                <li><strong>FoodHub Rating:</strong> <span class="rating">{{ render_stars(business.rating) }}</span></li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
