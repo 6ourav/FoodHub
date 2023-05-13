@@ -1,5 +1,4 @@
 from flask import Flask, render_template, request
-from yelpapi import YelpAPI
 import requests
 import json
 
