@@ -12,4 +12,4 @@ class Restaurant:
 class MyRestClient:
     def __init__(self, api_key):
         self.api_key = api_key
-        self.host = 'ieCqIDSYqdh2Cmi222wwGVAJYBCCiEa1VHazzL6YvC7_Ex2fUIKWNI4bfO8QLAPpjVE3qjV6zzurSONBaL3QdRitMKqi9m74F910mknmbOc49KE9JWPiRgoUGadRZHYx'
+        self.host = 'BEXoRr0ICXnYgnj5wT3GY8rVim9shFz1N9ciLZJAfednLHF9GsQ28AwJtdd5StCIwA9bHYbzq2-ORcobWXOuXKzkHnBDdni_O3loOxZVk1vpdfE-6C3YRlLY2KZRZHYx'
