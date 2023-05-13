@@ -3,6 +3,7 @@ from yelpapi import YelpAPI
 import requests
 import json
 
+
 # 3rd-party packages
 from flask import Flask, render_template, request, redirect, url_for
 from flask_mongoengine import MongoEngine
