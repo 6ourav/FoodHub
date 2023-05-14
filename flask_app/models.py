@@ -28,12 +28,6 @@ class Following(db.Document):
     user2 = db.ReferenceField(User)
     date = db.StringField(required=True)
     
-class Follower(db.Document):
-    user1 = db.ReferenceField(User)
-    user2 = db.ReferenceField(User)
-    date = db.StringField(required=True)
-    
-
 class Review(db.Document):
     commenter = db.ReferenceField(User)
     content = db.StringField(required=True, min_length=5, max_length=500)
