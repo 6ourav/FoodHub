@@ -40,7 +40,6 @@ import base64
 
 def render_stars(rating):
     filled_stars = int(rating)
-    
     empty_stars = 5 - filled_stars
     return '★' * filled_stars + '☆' * empty_stars
 
@@ -58,13 +57,44 @@ def search():
     data = response.json()
     return render_template('restaurants.html', businesses=data['businesses'], render_stars=render_stars)
 
-@app.route('/restaurants/<business_id>')
+@app.route('/restaurants/<business_id>', methods=["GET", "POST"])
 def restaurant_detail(business_id):
     headers = {'Authorization': 'Bearer %s' % api_key}
     url = f'https://api.yelp.com/v3/businesses/{business_id}'
     response = requests.get(url, headers=headers)
     business = response.json()
-    return render_template('restaurant_detail.html', business=business, render_stars=render_stars)
+    form = RestaurantReviewForm()
+    if not form.validate_on_submit():
+        for error in form.errors.values():
+            for e in error:
+                flash(e)
+      
+    if form.validate_on_submit():
+        review = Review(
+            commenter=current_user,
+            comment=form.comment.data,
+            date=current_time(),
+            id_restaurant=business_id,
+            restaurant_name=business.get('name'),
+            rating=form.rating.data,
+            stars=render_stars(form.rating.data)
+        )
+        review.save()
+        img = form.image.data
+        content_type = f'images/{secure_filename(img.filename)[-3:]}'
+        review.image.put(img.stream, content_type=content_type)
+        review.save()
+        bytes_im = io.BytesIO(review.image.read())
+        image = base64.b64encode(bytes_im.getvalue()).decode()
+        review.modify(image_encoded=image)
+        review.save()
+        return redirect(url_for('restaurant_detail', business_id=business_id))
+
+    reviews = Review.objects(id_restaurant=business_id).order_by('-date')
+    average = Review.objects(id_restaurant=business_id).average('rating')
+    render_stars(average)
+    return render_template('restaurant_detail.html', business=business, form=form, reviews=reviews, average=average)
+
 
 @app.route("/profile/<username>")
 @login_required
