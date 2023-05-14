@@ -2,7 +2,7 @@ from flask_login import current_user
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileRequired, FileAllowed
 from werkzeug.utils import secure_filename
-from wtforms import StringField, IntegerField, SubmitField, TextAreaField, PasswordField
+from wtforms import StringField, IntegerField, SubmitField, TextAreaField, PasswordField, SelectField
 from wtforms.validators import (
     InputRequired,
     DataRequired,
@@ -27,8 +27,12 @@ class RestaurantReviewForm(FlaskForm):
     comment = TextAreaField(
         "Comment", validators=[InputRequired(), Length(min=5, max=500)]
     )
-    pic = FileField("Profile Picture", validators=[FileRequired(), FileAllowed(['jpg', 'png'], 'Images Only!')])
-    submit = SubmitField("Enter Comment")
+    image = FileField("Image", validators=[FileRequired(), FileAllowed(['jpg', 'png'], 'Images Only!')])
+    rating = SelectField('Rating', choices=[(i, i) for i in range(1, 6)])
+   # rating = SelectField('Rating', choices=[(i, i) for i in range(1, 6)])
+    rating = SelectField('Rating', choices=[(1,"★☆☆☆☆"),(2,"★★☆☆☆"),(3,"★★★☆☆"),(4,"★★★★☆"),(5,"★★★★★")])
+    
+    submit = SubmitField("Post")
     
 class RegistrationForm(FlaskForm):
     username = StringField(
@@ -50,7 +54,20 @@ class RegistrationForm(FlaskForm):
         user = User.objects(email=email.data).first()
         if user is not None:
             raise ValidationError("Email is taken")
-
+        
+    def validate_password(self, password):
+        p = password.data
+        if len(p) < 8:
+            raise ValidationError('Password must be at least 8 characters.')
+        if not any(char.isdigit() for char in p):
+            raise ValidationError('Password must contain at least one digit.')
+        elif not any(char.isalpha() for char in p):
+            raise ValidationError('Password must contain at least one letter.')
+        elif not any(not char.isalnum() for char in p):
+            raise ValidationError('Password must contain at least one special character')
+            
+            
+        
 class LoginForm(FlaskForm):
     username = StringField("Username", validators=[InputRequired(), Length(min=1, max=40)])
     password = PasswordField("Password", validators=[InputRequired()])

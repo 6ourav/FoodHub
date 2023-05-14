@@ -13,6 +13,10 @@ from flask_login import (
     logout_user,
     login_required,
 )
+
+from googlesearch import search
+from bs4 import BeautifulSoup
+
 from wtforms.validators import ValidationError
 
 from flask_bcrypt import Bcrypt
@@ -40,7 +44,6 @@ import base64
 
 def render_stars(rating):
     filled_stars = int(rating)
-    
     empty_stars = 5 - filled_stars
     return '★' * filled_stars + '☆' * empty_stars
 
@@ -49,22 +52,78 @@ def render_stars(rating):
 def index():
     return render_template('index.html')
 
-@app.route('/search')
-def search():
+@app.route('/search_restaurant', methods=["GET"])
+def search_restaurant():
     location = request.args.get('location')
     headers = {'Authorization': 'Bearer %s' % api_key}
     params = {'location': location, 'categories': 'restaurants'}
     response = requests.get('https://api.yelp.com/v3/businesses/search', headers=headers, params=params)
     data = response.json()
-    return render_template('restaurants.html', businesses=data['businesses'], render_stars=render_stars)
+    pics = {}
+    for business in data['businesses']:
+        query = business['name']
+        search_results = search(query, num_results=1)
+        first_result_url = next(search_results, None)
+        if first_result_url:
+            # Send a GET request to the search result URL
+            response = requests.get(first_result_url)
+            html_content = response.content
 
-@app.route('/restaurants/<business_id>')
+            # Create a Beautiful Soup object by parsing the HTML content
+            soup = BeautifulSoup(html_content, "html.parser")
+
+            # Find the <img> tag(s) on the page
+            img_tags = soup.find_all("img")
+
+            # Get the URL of the first image
+            if img_tags:
+                first_image_url = img_tags[0]["src"]
+                pics[query] = first_image_url
+            else:
+                pics[query] = business['image_url']
+        else:
+            pics[query] = business['image_url']
+
+    return render_template('restaurants.html', businesses=data['businesses'], render_stars=render_stars, pics=pics)
+
+@app.route('/restaurants/<business_id>', methods=["GET", "POST"])
 def restaurant_detail(business_id):
     headers = {'Authorization': 'Bearer %s' % api_key}
     url = f'https://api.yelp.com/v3/businesses/{business_id}'
     response = requests.get(url, headers=headers)
     business = response.json()
-    return render_template('restaurant_detail.html', business=business, render_stars=render_stars)
+    form = RestaurantReviewForm()
+    if not form.validate_on_submit():
+        for error in form.errors.values():
+            for e in error:
+                flash(e)
+      
+    if form.validate_on_submit():
+        review = Review(
+            commenter=current_user,
+            comment=form.comment.data,
+            date=current_time(),
+            id_restaurant=business_id,
+            restaurant_name=business.get('name'),
+            rating=form.rating.data,
+            stars=render_stars(form.rating.data)
+        )
+        review.save()
+        img = form.image.data
+        content_type = f'images/{secure_filename(img.filename)[-3:]}'
+        review.image.put(img.stream, content_type=content_type)
+        review.save()
+        bytes_im = io.BytesIO(review.image.read())
+        image = base64.b64encode(bytes_im.getvalue()).decode()
+        review.modify(image_encoded=image)
+        review.save()
+        return redirect(url_for('restaurant_detail', business_id=business_id))
+
+    reviews = Review.objects(id_restaurant=business_id).order_by('-date')
+    average = Review.objects(id_restaurant=business_id).average('rating')
+    render_stars(average)
+    return render_template('restaurant_detail.html', business=business, form=form, reviews=reviews, average=average)
+
 
 @app.route("/profile/<username>")
 @login_required
@@ -177,9 +236,10 @@ def login():
         user = User.objects(username=form.username.data).first()
         if user is not None and bcrypt.check_password_hash(user.password, form.password.data):
             login_user(user)
+            return redirect(url_for('index'))
         else:
             flash('Login attempt failed')
-        return redirect(url_for('index'))
+            return redirect(url_for('login'))
     return render_template('login.html', form=form)
 
 @app.route("/logout")
