@@ -6,92 +6,8 @@
 <head>
     <title>{{ business.name }} Details</title>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='custom.css') }}">
-    <style>
-        body {
-            background-color: #f6f6f6;
-            font-family: Arial, sans-serif;
-        }
-
-        .container {
-            max-width: 1170px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        .navbar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            background-color: #ff5200;
-            color: #fff;
-            padding: 10px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            width: 100%;
-            z-index: 9999;
-        }
-
-        .navbar-brand {
-            font-size: 30px;
-            font-weight: bold;
-        }
-
-        .navbar-links {
-            display: flex;
-            align-items: center;
-        }
-
-        .navbar-links > a {
-            margin-left: 20px;
-            color: #fff;
-            text-decoration: none;
-            font-weight: bold;
-        }
-
-        .navbar-links > a:hover {
-            color: #eee;
-        }
-
-        .restaurant-banner {
-            height: 200px;
-            overflow: hidden;
-            margin-top: 60px;
-        }
-
-        .restaurant-banner img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .restaurant-name {
-            position: absolute;
-            background-color: rgba(0, 0, 0, 0.7);
-            color: #ffffff;
-            padding: 10px;
-            width: 100%;
-            font-size: 24px;
-            font-weight: bold;
-        }
-
-        .content {
-            margin-top: 260px;
-        }
-    </style>
 </head>
 <body>
-    <nav class="navbar">
-        <a href="{{ url_for('index') }}" class="navbar-brand">Food Hub</a>
-        <form class="search-form" action="{{ url_for('search') }}" method="GET">
-          <input class="search-input" type="text" name="location" placeholder="Enter location">
-          <button class="search-button" type="submit">Search</button>
-        </form>
-    </nav>
-    <div class="restaurant-banner">
-        <img src="{{ business.image_url }}" alt="Restaurant Image">
-        <div class="restaurant-name">{{ business.name }}</div>
-    </div>
     <div class="content">
         <h1>Details</h1>
         <ul>
@@ -101,25 +17,38 @@
             <li><strong>Address:</strong> {{ business.location.address1 }}, {{ business.location.city }}, {{ business.location.state }} {{ business.location.zip_code }}</li>
             <li><strong>Price Range:</strong> {{ business.price }}</li>
         </ul>
-        
-        <h2>Additional Information</h2>
-        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed tempus, urna in cursus viverra, tellus justo varius urna, ac tincidunt massa leo et mauris.</p>
-        <p>Nullam blandit augue nec odio bibendum, at pellentesque magna tincidunt. Fusce auctor aliquet arcu. Ut euismod mauris nec dapibus faucibus.</p>
-        
-        <h2>Reviews</h2>
-        <div class="review">
-            <h3>John Doe</h3>
-            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed tempus, urna in cursus viverra, tellus justo varius urna, ac tincidunt massa leo et mauris.</p>
-        </div>
-        <div class="review">
-            <h3>Jane Smith</h3>
-            <p>Nullam blandit augue nec odio bibendum, at pellentesque magna tincidunt. Fusce auctor aliquet arcu. Ut euismod mauris nec dapibus faucibus.</p>
-        </div>
-        
-        <!-- Add more content here -->
+        {% if current_user.is_authenticated %}
+        <h2>Post a Review</h2>
+        <form method="POST" action="" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="comment">Comment</label>
+                <input type="text" id="comment" name="comment" required>
+                <label for="image">Image</label>
+                <input type="file" class="form-control-file" id="image" name="image" required>
+                <button type="submit" class="btn btn-primary" id="submit" name="submit">Post</button>
+            </div>
+
+ 
+        </form>
+        {% endif %}
+        <h2>Review, total: {{ reviews|length }} </h2>
+        {% for review in reviews %}
+            <div class="review">
+                <p><strong>Commenter:</strong> {{ review.commenter.username }}</p>
+                <p><strong>Comment:</strong> {{ review.comment }}</p>
+                <img src="data:image/png;base64, {{review.image_encoded}}" alt="Review Image">
+            </div>
+        {% endfor %}
     </div>
 </body>
 </html>
 
- 
 {% endblock %}
+
+
+{{ form.hidden_tag() }}
+{{ form.comment.label }}
+{{ form.comment(class="form-control") }}
+{{ form.image.label }}
+{{ form.image(class="form-control-file") }}
+{{ form.submit(class="btn btn-primary") }}

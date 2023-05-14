@@ -30,9 +30,9 @@ class Following(db.Document):
     
 class Review(db.Document):
     commenter = db.ReferenceField(User)
-    content = db.StringField(required=True, min_length=5, max_length=500)
+    comment = db.StringField(required=True, min_length=5, max_length=500)
     date = db.StringField(required=True)
-    id_business = db.StringField(required=True)
-    movie_title = db.StringField(required=True)
+    id_restaurant = db.StringField(required=True)  # Update field name to "id_restaurant"
+    restaurant_name = db.StringField(required=True)
     image = db.ImageField()
     image_encoded = db.StringField()

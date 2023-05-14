@@ -27,7 +27,7 @@ class RestaurantReviewForm(FlaskForm):
     comment = TextAreaField(
         "Comment", validators=[InputRequired(), Length(min=5, max=500)]
     )
-    pic = FileField("Profile Picture", validators=[FileRequired(), FileAllowed(['jpg', 'png'], 'Images Only!')])
+    image = FileField("Image", validators=[FileRequired(), FileAllowed(['jpg', 'png'], 'Images Only!')])
     submit = SubmitField("Enter Comment")
     
 class RegistrationForm(FlaskForm):

@@ -2,6 +2,7 @@ from flask import Flask, render_template, request
 from yelpapi import YelpAPI
 import requests
 import json
+import os
 
 # 3rd-party packages
 from flask import render_template, request, redirect, url_for, flash
@@ -33,7 +34,7 @@ from .forms import (
 )
 from .models import User, Review, Following, load_user
 from .utils import current_time
-
+from .client import Restaurant
 
 import io
 import base64
@@ -64,7 +65,78 @@ def restaurant_detail(business_id):
     url = f'https://api.yelp.com/v3/businesses/{business_id}'
     response = requests.get(url, headers=headers)
     business = response.json()
-    return render_template('restaurant_detail.html', business=business, render_stars=render_stars)
+
+    form = RestaurantReviewForm()
+    if form.validate_on_submit():
+        # Get the restaurant details from the API or your data source
+
+
+        # Create a new review object
+        review = Review(
+            commenter=current_user,
+            comment=form.comment.data,
+            date=current_time(),
+            id_restaurant=business_id,
+            restaurant_name=business.get('name'),
+        )
+        # Save the review to the database
+        review.save()
+        img = form.image.data
+        content_type = f'images/{secure_filename(img.file)[-3:]}'
+        review.image.put(img.stream, content_type=content_type)
+        review.save()
+        bytes_im = io.BytesIO(current_user.image.read())
+        image = base64.b64encode(bytes_im.getvalue()).decode()
+        review.modify(image_encoded=image)
+        review.save()
+        return redirect(url_for('restaurant_detail', business_id=business_id))
+        # Fetch the reviews for the current restaurant sorted by newest
+    reviews = Review.objects(id_restaurant=business_id).order_by('-date')
+    return render_template('restaurant_detail.html', business=business, form=form, reviews=reviews)
+
+
+@app.route('/restaurants/<business_id>/review', methods=['POST'])
+@login_required
+def submit_review(business_id):
+    form = RestaurantReviewForm()
+
+    if form.validate_on_submit():
+        # Get the restaurant details from the API or your data source
+
+
+        # Create a new review object
+        review = Review(
+            commenter=current_user,
+            comment=form.comment.data,
+            date=current_time(),
+            id_restaurant=business_id,
+            restaurant_name=business.get('name'),
+        )
+        # Save the review to the database
+        review.save()
+        img = form.image.data
+        content_type = f'images/{secure_filename(img.file)[-3:]}'
+        review.image.put(img.stream, content_type=content_type)
+        review.save()
+        bytes_im = io.BytesIO(current_user.image.read())
+        image = base64.b64encode(bytes_im.getvalue()).decode()
+        review.modify(image_encoded=image)
+        review.save()
+        return redirect(url_for('restaurant_detail', business_id=business_id))
+        # Fetch the reviews for the current restaurant sorted by newest
+    reviews = Review.objects(id_restaurant=business_id).order_by('-date')
+    headers = {'Authorization': 'Bearer %s' % api_key}
+    url = f'https://api.yelp.com/v3/businesses/{business_id}'
+    response = requests.get(url, headers=headers)
+    business = response.json()
+    return render_template("restaurant_detail.html", form=form, business=business, reviews=reviews)
+        # Redirect to the restaurant detail page
+        
+
+    # If the form is not valid, render the restaurant detail page again
+
+
+
 
 @app.route("/profile/<username>")
 @login_required
@@ -91,7 +163,7 @@ def follow_user(username):
         date = current_time()
     )
     following_change.save()
-    follower_change = Follower(
+    follower_change = Following(
         user1 = user,
         user2 = current_user,
         date = current_time()
