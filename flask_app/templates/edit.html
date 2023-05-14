@@ -20,12 +20,12 @@
 </div>
 <div class="row">
     <div class="col">
-        {# Upate bio form #}
+        {# Upate food form #}
         <form action="/edit" method="post">
             {{ form1.csrf_token }}
             <div class="form-group">
-                <label for="username">Bio</label>
-                <textarea class="form-control" aria-label="With textarea"></textarea>
+                <label for="food">Favorite Food</label>
+                <input type="text" class="form-control" id="food" name="food" minlength="1" maxlength="40" required>
                 <button type="submit" class="btn btn-outline-primary btn-sm" id="submit1" name="submit1">Update</button>
             </div>
         </form>
