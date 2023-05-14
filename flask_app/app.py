@@ -104,7 +104,7 @@ def follow_user(username):
 def unfollow_user(username):
     user = User.objects(username=username).first()
     Following.objects(user1=current_user, user2=user).first().delete()
-    Follower.objects(user1=user, user2=current_user).first().delete()
+    Following.objects(user1=user, user2=current_user).first().delete()
     return redirect(url_for('profile', username=username))
     
 @app.route("/edit", methods=["GET", "POST"])
