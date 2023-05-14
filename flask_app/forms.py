@@ -56,8 +56,11 @@ class LoginForm(FlaskForm):
     password = PasswordField("Password", validators=[InputRequired()])
     submit = SubmitField("Log In")
 
-class UpdateBioForm(FlaskForm):
-    bio = TextAreaField("Bio", validators=[InputRequired(), Length(min=1, max=500)])
+class UpdateFoodForm(FlaskForm):
+    food = StringField(
+        "Food", validators=[InputRequired(), Length(min=1, max=40)]
+    )
+    submit = SubmitField("Update")
 
 class UpdateProfilePicForm(FlaskForm):
     profile_picture = FileField("Profile Picture", validators=[FileRequired(), FileAllowed(['jpg', 'png'], 'Images Only!')])
