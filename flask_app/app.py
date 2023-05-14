@@ -28,10 +28,10 @@ from .forms import (
     RestaurantReviewForm,
     RegistrationForm,
     LoginForm,
-    UpdateBioForm,
+    UpdateFoodForm,
     UpdateProfilePicForm
 )
-from .models import User, Review, Following, Follower, load_user
+from .models import User, Review, Following, load_user
 from .utils import current_time
 
 
@@ -58,8 +58,6 @@ def search():
     data = response.json()
     return render_template('restaurants.html', businesses=data['businesses'], render_stars=render_stars)
 
-
-
 @app.route('/restaurants/<business_id>')
 def restaurant_detail(business_id):
     headers = {'Authorization': 'Bearer %s' % api_key}
@@ -68,23 +66,16 @@ def restaurant_detail(business_id):
     business = response.json()
     return render_template('restaurant_detail.html', business=business, render_stars=render_stars)
 
-    
-    
-    
-
 @app.route("/profile/<username>")
+@login_required
 def profile(username):
     user = User.objects(username=username).first()
     if user is not None:
         following_list = Following.objects(user1=user)
         follower_list = Following.objects(user2=user)
         reviews = Review.objects(commenter=user).order_by("-date")
-        if current_user.is_authenticated:
-            follows = Following.objects(user1=current_user, user2=user).first()
-            if follows is not None:
-                return render_template("profile.html", user=user, reviews=reviews, is_following=True,
-                                       following_list=following_list, follower_list=follower_list)
-        return render_template("profile.html", user=user, reviews=reviews, is_following=False,
+        is_following = Following.objects(user1=current_user.id, user2=user.id).first() is not None
+        return render_template("profile.html", user=user, reviews=reviews, is_following=is_following,
                                following_list=following_list, follower_list=follower_list)
     else:
         return render_template("profile.html", error_msg="User does not exist")
@@ -95,14 +86,14 @@ def profile(username):
 def follow_user(username):
     user = User.objects(username=username).first()
     following_change = Following(
-        user1 = current_user,
-        user2 = user,
+        user1 = current_user.id,
+        user2 = user.id,
         date = current_time()
     )
     following_change.save()
-    follower_change = Follower(
-        user1 = user,
-        user2 = current_user,
+    follower_change = Following(
+        user1 = user.id,
+        user2 = current_user.id,
         date = current_time()
     )
     follower_change.save()
@@ -112,20 +103,22 @@ def follow_user(username):
 @login_required
 def unfollow_user(username):
     user = User.objects(username=username).first()
-    Following.objects(user1=current_user, user2=user).first().delete()
-    Follower.objects(user1=user, user2=current_user).first().delete()
+    Following.objects(user1=current_user.id, user2=user.id).first().delete()
+    Following.objects(user1=user.id, user2=current_user.id).first().delete()
     return redirect(url_for('profile', username=username))
-    
-    
-    
     
 @app.route("/edit", methods=["GET", "POST"])
 @login_required
 def edit():
-    form1 = UpdateBioForm()
+    form1 = UpdateFoodForm()
     form2 = UpdateProfilePicForm()
+    if not form1.validate_on_submit():
+        for error in form1.errors.values():
+            for e in error:
+                flash(e)
     if "submit1" in request.form and form1.validate_on_submit():
-        current_user.modify(bio=form1.bio.data)
+
+        current_user.modify(food=form1.food.data)
         current_user.save()
         return redirect(url_for('profile', username=current_user.username))
     if "submit2" in request.form and form2.validate_on_submit():
@@ -148,19 +141,12 @@ def edit():
                 flash(e)
     return render_template('edit.html', form1=form1, form2=form2)
     
-    
-    
 @app.route("/followlist", methods=["GET", "POST"])
 @login_required
 def followlist():
-    follower = Following.objects(user2=current_user).order_by('-date')
-    following = Following.objects(user1=current_user).order_by('-date')
+    follower = Following.objects(user2=current_user.id).order_by('-date')
+    following = Following.objects(user1=current_user.id).order_by('-date')
     return render_template('followlist.html', follower=follower, following=following)
-
-    
-    
-    
-    
     
 @app.route("/register", methods=["GET", "POST"])
 def register():
@@ -191,10 +177,9 @@ def login():
         user = User.objects(username=form.username.data).first()
         if user is not None and bcrypt.check_password_hash(user.password, form.password.data):
             login_user(user)
-            return redirect(url_for('index'))
         else:
             flash('Login attempt failed')
-            return redirect(url_for('login'))
+        return redirect(url_for('index'))
     return render_template('login.html', form=form)
 
 @app.route("/logout")

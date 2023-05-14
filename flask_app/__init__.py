@@ -23,7 +23,7 @@ from datetime import datetime
 
 # local
 app = Flask(__name__)
-app.config["MONGODB_HOST"] = "mongodb://localhost:27017/final"
+app.config["MONGODB_HOST"] = "mongodb://localhost:27017/final2"
 app.config["SECRET_KEY"] = b"L\x9d\xfcY\xf1`\x91\xeb\\\xba\xf9\xb5\x8a'\x9c\x1f"
 
 app.config.update(

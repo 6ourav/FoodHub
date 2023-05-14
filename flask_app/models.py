@@ -15,7 +15,7 @@ class User(db.Document, UserMixin):
     password = db.StringField(required=True)
     profile_picture = db.ImageField()
     pic_encoded = db.StringField()
-    bio = db.StringField(max_length=500)
+    food = db.StringField(min_length=1, max_length=40)
     
 
 
@@ -24,11 +24,6 @@ class User(db.Document, UserMixin):
         return self.username
 
 class Following(db.Document):
-    user1 = db.ReferenceField(User)
-    user2 = db.ReferenceField(User)
-    date = db.StringField(required=True)
-    
-class Follower(db.Document):
     user1 = db.ReferenceField(User)
     user2 = db.ReferenceField(User)
     date = db.StringField(required=True)
