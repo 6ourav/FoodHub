@@ -15,7 +15,7 @@ class User(db.Document, UserMixin):
     password = db.StringField(required=True)
     profile_picture = db.ImageField()
     pic_encoded = db.StringField()
-    bio = db.StringField(max_length=500)
+    food = db.StringField(min_length=1, max_length=40)
     
 
 
@@ -28,17 +28,14 @@ class Following(db.Document):
     user2 = db.ReferenceField(User)
     date = db.StringField(required=True)
     
-class Follower(db.Document):
-    user1 = db.ReferenceField(User)
-    user2 = db.ReferenceField(User)
-    date = db.StringField(required=True)
-    
 
 class Review(db.Document):
     commenter = db.ReferenceField(User)
-    content = db.StringField(required=True, min_length=5, max_length=500)
+    comment = db.StringField(required=True, min_length=5, max_length=500)
     date = db.StringField(required=True)
-    id_business = db.StringField(required=True)
-    movie_title = db.StringField(required=True)
+    id_restaurant = db.StringField(required=True)
+    restaurant_name = db.StringField(required=True)
     image = db.ImageField()
     image_encoded = db.StringField()
+    rating=db.IntField(required=True)
+    stars=db.StringField()
