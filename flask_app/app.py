@@ -14,8 +14,7 @@ from flask_login import (
     login_required,
 )
 
-from googlesearch import search
-from bs4 import BeautifulSoup
+
 
 from wtforms.validators import ValidationError
 
@@ -59,32 +58,7 @@ def search_restaurant():
     params = {'location': location, 'categories': 'restaurants'}
     response = requests.get('https://api.yelp.com/v3/businesses/search', headers=headers, params=params)
     data = response.json()
-    pics = {}
-    for business in data['businesses']:
-        query = business['name']
-        search_results = search(query, num_results=1)
-        first_result_url = next(search_results, None)
-        if first_result_url:
-            # Send a GET request to the search result URL
-            response = requests.get(first_result_url)
-            html_content = response.content
-
-            # Create a Beautiful Soup object by parsing the HTML content
-            soup = BeautifulSoup(html_content, "html.parser")
-
-            # Find the <img> tag(s) on the page
-            img_tags = soup.find_all("img")
-
-            # Get the URL of the first image
-            if img_tags:
-                first_image_url = img_tags[0]["src"]
-                pics[query] = first_image_url
-            else:
-                pics[query] = business['image_url']
-        else:
-            pics[query] = business['image_url']
-
-    return render_template('restaurants.html', businesses=data['businesses'], render_stars=render_stars, pics=pics)
+    return render_template('restaurants.html', businesses=data['businesses'], render_stars=render_stars)
 
 @app.route('/restaurants/<business_id>', methods=["GET", "POST"])
 def restaurant_detail(business_id):
