@@ -65,6 +65,11 @@
             font-size: 14px;
             color: #ffead9;
         }
+        .rating {
+            font-size: 24px;
+            color: #FFD700;
+        }
+
     </style>
 </head>
 <body>
@@ -78,8 +83,9 @@
                     </div>
                     <div class="restaurant-details">
                         <h2>{{ business.name }}</h2>
-                        <p>Rating: {{ business.rating }}</p>
                         <p>Price Range: {{ business.price }}</p>
+                        <li><strong>Critics Rating:</strong> <span class="rating">{{ render_stars(business.rating) }}</span></li>
+                        <li><strong>FoodHub Rating:</strong> <span class="rating">{{ render_stars(business.rating) }}</span></li>
                     </div>
                 </a>
             {% endfor %}

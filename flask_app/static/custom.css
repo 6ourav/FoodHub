@@ -134,3 +134,7 @@ body {
     background-color: #49274a;
     color: #f4decb;
 } 
+.rating {
+    font-size: 24px;
+    color: #FFD700;
+}
