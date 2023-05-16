@@ -11,14 +11,15 @@
                     </div>
                     <div class="restaurant-details">
                         <h2>{{ business.name }}</h2>
-                        <p>Rating: {{ business.rating }}</p>
                         <p>Price Range: {{ business.price }}</p>
+                        <p><strong>Yelp's Rating:</strong> <span class="rating">{{ render_stars(business.rating) }}</span></p>  
+                        <p><strong>FoodHub's Rating:</strong> <span class="rating">{{ render_stars(reviews[business.id]) }}</span></p>  
                     </div>
                 </a>
             {% endfor %}
         </div>
     {% else %}
-        <p>No results found.</p>
+        <p>No restaurants found.</p>
     {% endif %}
 
 {% endblock %}

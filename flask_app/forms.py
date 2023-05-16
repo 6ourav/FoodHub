@@ -28,8 +28,6 @@ class RestaurantReviewForm(FlaskForm):
         "Comment", validators=[InputRequired(), Length(min=5, max=500)]
     )
     image = FileField("Image", validators=[FileRequired(), FileAllowed(['jpg', 'png'], 'Images Only!')])
-    rating = SelectField('Rating', choices=[(i, i) for i in range(1, 6)])
-   # rating = SelectField('Rating', choices=[(i, i) for i in range(1, 6)])
     rating = SelectField('Rating', choices=[(1,"★☆☆☆☆"),(2,"★★☆☆☆"),(3,"★★★☆☆"),(4,"★★★★☆"),(5,"★★★★★")])
     
     submit = SubmitField("Post")

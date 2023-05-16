@@ -9,15 +9,15 @@
     {% endif %}
   {% endwith %}
 
+
 <h1>{{ business.name }} Details</h1>
 <ul>
     <li><strong>Name:</strong> {{ business.name }}</li>
-    <li><strong>Yelp's Rating:</strong> {{ business.rating }}</li> 
-    <li><strong>Our Rating:</strong> {{ average }}</li> 
     <li><strong>Phone: </strong> {{ business.phone }}</li>
     <li><strong>Address:</strong> {{ business. location.address1 }}, {{ business.location.city }}, {{ business.location.state }} {{ business.location.zip_code }}</li>
     <li><strong>Price Range:</strong> {{ business.price }}</li>
-    <li><strong>Website:</strong> <a href="{{ business.url }}" target="_blank">{{ business.url }}</a></li>
+    <li><strong>Yelp's Rating:</strong> <span class="rating">{{ render_stars(business.rating) }}</span></li>
+    <li><strong>FoodHub Rating:</strong> <span class="rating">{{ render_stars(average) }}</span></li>
 </ul>
  
 {% if current_user.is_authenticated %}
@@ -59,7 +59,7 @@
         <p><strong>Commenter:</strong> {{ review.commenter.username }}</p>
         <p><strong>Comment:</strong> {{ review.comment }}</p>
         <p><strong>{{ review.stars }}</strong> </p>
-        <img src="data:image/png;base64, {{review.image_encoded}}" alt="Review Image">
+        <img src="data:image/png;base64, {{ review.image_encoded }}" alt="Review Image" style="max-width: 300px; max-height: 300px;">
     </div>
 {% endfor %}
 {% endblock %}

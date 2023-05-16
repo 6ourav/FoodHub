@@ -56,25 +56,20 @@
     </div>
   </div>
 
-
-
-
 <div class="row">
     <div class="col-md-12">
-        <h2> {{ user.username }}'s reviews <small class="float-right">{{ reviews|length }} total reviews</small></h2>
+        <h2> {{ user.username }}'s Reviews <small class="float-right"></small></h2>
+        <h2> Total Reviews: {{ reviews|length }} <small class="float-right"></small></h2>
+        
         {% for review in reviews %}
-        <div class="card text-center">
-          <div class="card-header">
-            {{ review.movie_title }} 
-          </div>
-          <div class="card-body">
-            <img src="data:image/png;base64,{{user.pic_encoded}}" class="mr-3 movie" alt="alt text">
-            <ul class="list-group list-group-flush">
-              <li class="list-group-item">{{ review.content }}</li>
-              <li class="list-group-item">{{ review.date }}</li>
-            </ul>
-          </div>
-        </div>
+          <a href="{{ url_for('restaurant_detail', business_id=review.id_restaurant) }}" class="restaurant-item">
+            <p><strong>Restaurant:</strong> {{ review.restaurant_name }}</p>
+            <p><strong>Commenter:</strong> {{ review.commenter.username }}</p>
+            <p><strong>Comment:</strong> {{ review.comment }}</p>
+            <p><strong>User Rating:</strong> {{ review.stars }} </p>
+            <img src="data:image/png;base64, {{ review.image_encoded }}" alt="Review Image" style="max-width: 300px; max-height: 300px;">
+          </a>
+          <div class="empty-space"></div>
         {% endfor %}
     </div>
 </div> 

@@ -58,7 +58,14 @@ def search_restaurant():
     params = {'location': location, 'categories': 'restaurants'}
     response = requests.get('https://api.yelp.com/v3/businesses/search', headers=headers, params=params)
     data = response.json()
-    return render_template('restaurants.html', businesses=data['businesses'], render_stars=render_stars)
+    reviews = {}
+    if 'businesses' in data and len(data['businesses']) > 0:
+        for business in data['businesses']:
+            reviews[business['id']] = Review.objects(id_restaurant=business['id']).average('rating')
+        return render_template('restaurants.html', businesses=data['businesses'], render_stars=render_stars, reviews=reviews)
+    else:
+        return render_template('restaurants.html')
+        
 
 @app.route('/restaurants/<business_id>', methods=["GET", "POST"])
 def restaurant_detail(business_id):
@@ -95,8 +102,7 @@ def restaurant_detail(business_id):
 
     reviews = Review.objects(id_restaurant=business_id).order_by('-date')
     average = Review.objects(id_restaurant=business_id).average('rating')
-    render_stars(average)
-    return render_template('restaurant_detail.html', business=business, form=form, reviews=reviews, average=average)
+    return render_template('restaurant_detail.html', business=business, form=form, reviews=reviews, average=average, render_stars=render_stars)
 
 
 @app.route("/profile/<username>")
